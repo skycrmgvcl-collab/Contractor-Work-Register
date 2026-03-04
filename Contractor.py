@@ -13,10 +13,10 @@ DATA_FILE = "contractor_work_register.xlsx"
 # -----------------------------------------------------
 
 contractor_list = [
-    "ABC Contractor",
-    "XYZ Infra",
-    "Patel Electrical",
-    "Om Power Works"
+    "Riken Patel",
+    "Ramesh Patel",
+    "Divyesh Patel",
+    "Auto Forge"
 ]
 
 # -----------------------------------------------------
@@ -32,7 +32,7 @@ else:
 # FILE UPLOAD
 # -----------------------------------------------------
 
-file = st.file_uploader("Upload PPR Report", type=["xlsx","csv"])
+file = st.file_uploader("Upload PPR Report", type=["xlsx","xls","csv"])
 
 if file:
 
