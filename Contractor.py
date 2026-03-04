@@ -8,51 +8,61 @@ st.title("⚡ Contractor Work Monitoring Dashboard")
 
 DATA_FILE = "contractor_work_register.xlsx"
 
-# -----------------------------------------------------
+# ---------------------------------------------------
 # CONTRACTOR MASTER LIST
-# -----------------------------------------------------
+# ---------------------------------------------------
 
 contractor_list = [
-    "Riken Patel",
-    "Ramesh Patel",
-    "Divyesh Patel",
-    "Auto Forge"
+    "ABC Contractor",
+    "XYZ Infra",
+    "Patel Electrical",
+    "Om Power Works"
 ]
 
-# -----------------------------------------------------
+# ---------------------------------------------------
 # LOAD EXISTING REGISTER
-# -----------------------------------------------------
+# ---------------------------------------------------
 
 if os.path.exists(DATA_FILE):
     saved_df = pd.read_excel(DATA_FILE)
 else:
     saved_df = pd.DataFrame()
 
-# -----------------------------------------------------
+# ---------------------------------------------------
 # FILE UPLOAD
-# -----------------------------------------------------
+# ---------------------------------------------------
 
-file = st.file_uploader("Upload PPR Report", type=["xlsx","xls","csv"])
+file = st.file_uploader(
+    "Upload PPR Report",
+    type=["xls", "xlsx", "csv"]
+)
 
 if file:
 
-    if file.name.endswith("csv"):
-        ppr = pd.read_csv(file)
-    else:
-        ppr = pd.read_excel(file)
+    # ---------------- FILE READ ----------------
 
-    # Clean column spaces
+    if file.name.endswith(".csv"):
+        ppr = pd.read_csv(file)
+
+    elif file.name.endswith(".xlsx"):
+        ppr = pd.read_excel(file, engine="openpyxl")
+
+    elif file.name.endswith(".xls"):
+        ppr = pd.read_excel(file, engine="xlrd")
+
+    else:
+        st.error("Unsupported file format")
+        st.stop()
+
+    # ---------------- CLEAN COLUMNS ----------------
+
     ppr.columns = ppr.columns.str.strip()
 
-# -----------------------------------------------------
-# FILTER B / C / D CATEGORY
-# -----------------------------------------------------
+    # ---------------- FILTER B/C/D ----------------
 
-    ppr = ppr[ppr["Survey Category"].isin(["B","C","D"])]
+    ppr = ppr[ppr["Survey Category"].isin(["B", "C", "D"])]
 
-# -----------------------------------------------------
-# REQUIRED COLUMNS FROM PPR
-# -----------------------------------------------------
+    # ---------------- REQUIRED COLUMNS ----------------
 
     base_columns = [
         "SR Number",
@@ -69,11 +79,9 @@ if file:
 
     ppr = ppr[[c for c in base_columns if c in ppr.columns]]
 
-    ppr.insert(0,"Sr No",range(1,len(ppr)+1))
+    ppr.insert(0, "Sr No", range(1, len(ppr) + 1))
 
-# -----------------------------------------------------
-# ADD MANUAL ENTRY COLUMNS
-# -----------------------------------------------------
+    # ---------------- ADD MANUAL ENTRY COLUMNS ----------------
 
     ppr["Contractor Name"] = ""
     ppr["MR Number"] = ""
@@ -85,37 +93,37 @@ if file:
     ppr["Bill Processed Date"] = ""
     ppr["Remarks"] = ""
 
-# -----------------------------------------------------
-# DASHBOARD METRICS
-# -----------------------------------------------------
+    # ---------------------------------------------------
+    # DASHBOARD METRICS
+    # ---------------------------------------------------
 
-    col1,col2,col3,col4,col5 = st.columns(5)
+    col1, col2, col3, col4, col5 = st.columns(5)
 
     col1.metric("Total Contractor Works", len(ppr))
 
     col2.metric(
         "Work Not Allotted",
-        len(ppr[ppr["Contractor Name"]==""])
+        len(ppr[ppr["Contractor Name"] == ""])
     )
 
     col3.metric(
         "Work Completed",
-        len(ppr[ppr["Work Completion Date"]!=""])
+        len(ppr[ppr["Work Completion Date"] != ""])
     )
 
     col4.metric(
         "Bill Submitted",
-        len(ppr[ppr["Bill Submitted"]=="Yes"])
+        len(ppr[ppr["Bill Submitted"] == "Yes"])
     )
 
     col5.metric(
         "Bill Processed",
-        len(ppr[ppr["Bill Processed Date"]!=""])
+        len(ppr[ppr["Bill Processed Date"] != ""])
     )
 
-# -----------------------------------------------------
-# DATA ENTRY TABLE
-# -----------------------------------------------------
+    # ---------------------------------------------------
+    # DATA ENTRY TABLE
+    # ---------------------------------------------------
 
     st.subheader("Contractor Work Register")
 
@@ -146,7 +154,7 @@ if file:
 
             "Bill Submitted": st.column_config.SelectboxColumn(
                 "Bill Submitted",
-                options=["Yes","No"]
+                options=["Yes", "No"]
             ),
 
             "Bill Submitted Date": st.column_config.DateColumn(
@@ -161,23 +169,23 @@ if file:
 
     )
 
-# -----------------------------------------------------
-# SAVE REGISTER
-# -----------------------------------------------------
+    # ---------------------------------------------------
+    # SAVE REGISTER
+    # ---------------------------------------------------
 
     if st.button("💾 Save Register"):
 
-        edited_df.to_excel(DATA_FILE,index=False)
+        edited_df.to_excel(DATA_FILE, index=False)
 
         st.success("Register Saved Successfully")
 
-# -----------------------------------------------------
-# DOWNLOAD REGISTER
-# -----------------------------------------------------
+    # ---------------------------------------------------
+    # DOWNLOAD REGISTER
+    # ---------------------------------------------------
 
     if os.path.exists(DATA_FILE):
 
-        with open(DATA_FILE,"rb") as f:
+        with open(DATA_FILE, "rb") as f:
 
             st.download_button(
                 "⬇ Download Contractor Register",
