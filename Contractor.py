@@ -15,18 +15,9 @@ DATA_FILE = "contractor_work_register.xlsx"
 contractor_list = [
     "Riken Patel",
     "Ramesh Patel",
-    "Divyesh Patel",
-    "Auto Forge"
+    "Auto Forge",
+    "Divyesh Patel"
 ]
-
-# ---------------------------------------------------
-# LOAD EXISTING REGISTER
-# ---------------------------------------------------
-
-if os.path.exists(DATA_FILE):
-    saved_df = pd.read_excel(DATA_FILE)
-else:
-    saved_df = pd.DataFrame()
 
 # ---------------------------------------------------
 # FILE UPLOAD
@@ -39,7 +30,7 @@ file = st.file_uploader(
 
 if file:
 
-    # ---------------- FILE READ ----------------
+    # ---------------- READ FILE ----------------
 
     if file.name.endswith(".csv"):
         ppr = pd.read_csv(file)
@@ -83,14 +74,14 @@ if file:
 
     # ---------------- ADD MANUAL ENTRY COLUMNS ----------------
 
-    ppr["Contractor Name"] = ""
+    ppr["Contractor Name"] = None
     ppr["MR Number"] = ""
-    ppr["MR Date"] = ""
-    ppr["Work Allotted Date"] = ""
-    ppr["Work Completion Date"] = ""
-    ppr["Bill Submitted"] = ""
-    ppr["Bill Submitted Date"] = ""
-    ppr["Bill Processed Date"] = ""
+    ppr["MR Date"] = pd.NaT
+    ppr["Work Allotted Date"] = pd.NaT
+    ppr["Work Completion Date"] = pd.NaT
+    ppr["Bill Submitted"] = None
+    ppr["Bill Submitted Date"] = pd.NaT
+    ppr["Bill Processed Date"] = pd.NaT
     ppr["Remarks"] = ""
 
     # ---------------------------------------------------
@@ -103,22 +94,22 @@ if file:
 
     col2.metric(
         "Work Not Allotted",
-        len(ppr[ppr["Contractor Name"] == ""])
+        ppr["Contractor Name"].isna().sum()
     )
 
     col3.metric(
         "Work Completed",
-        len(ppr[ppr["Work Completion Date"] != ""])
+        ppr["Work Completion Date"].notna().sum()
     )
 
     col4.metric(
         "Bill Submitted",
-        len(ppr[ppr["Bill Submitted"] == "Yes"])
+        (ppr["Bill Submitted"] == "Yes").sum()
     )
 
     col5.metric(
         "Bill Processed",
-        len(ppr[ppr["Bill Processed Date"] != ""])
+        ppr["Bill Processed Date"].notna().sum()
     )
 
     # ---------------------------------------------------
@@ -140,30 +131,20 @@ if file:
                 options=contractor_list
             ),
 
-            "MR Date": st.column_config.DateColumn(
-                "MR Date"
-            ),
+            "MR Date": st.column_config.DateColumn("MR Date"),
 
-            "Work Allotted Date": st.column_config.DateColumn(
-                "Work Allotted Date"
-            ),
+            "Work Allotted Date": st.column_config.DateColumn("Work Allotted Date"),
 
-            "Work Completion Date": st.column_config.DateColumn(
-                "Work Completion Date"
-            ),
+            "Work Completion Date": st.column_config.DateColumn("Work Completion Date"),
 
             "Bill Submitted": st.column_config.SelectboxColumn(
                 "Bill Submitted",
                 options=["Yes", "No"]
             ),
 
-            "Bill Submitted Date": st.column_config.DateColumn(
-                "Bill Submitted Date"
-            ),
+            "Bill Submitted Date": st.column_config.DateColumn("Bill Submitted Date"),
 
-            "Bill Processed Date": st.column_config.DateColumn(
-                "Bill Processed Date"
-            )
+            "Bill Processed Date": st.column_config.DateColumn("Bill Processed Date")
 
         }
 
